@@ -18,10 +18,10 @@ export default function Editor({ plan }: { plan: Plan }) {
 
   const vol = useMemo(() => {
     const gross = grossVolumeL(plan.tank);
-    const subVol = (plan.tank.l * plan.tank.w * (plan.substrate.thicknessMm / 10)) / 1000;
-    const subKg = substrateVolumeL(plan.tank, plan.substrate);
-    const displace = plan.items.filter((i) => i.kind === 'hardscape').length;
-    const eff = Math.max(0, gross - subVol - plan.items.length);
+    const subVol = substrateVolumeL(plan.tank, plan.substrate);
+    const subKg = substrateWeightKg(plan.tank, plan.substrate);
+    const displace = hardscapeDisplacementL(plan.items);
+    const eff = effectiveVolumeL(plan.tank, plan.substrate, plan.items);
     return { gross, subVol, subKg, displace, eff };
   }, [plan]);
 
@@ -143,8 +143,9 @@ export default function Editor({ plan }: { plan: Plan }) {
             </div>
           )}
           <div className="volbar" data-testid="volume-summary">
-            毛水量 <b>{vol.gross.toFixed(1)}L</b> ｜ 底砂体积 <b>{vol.subKg.toFixed(1)}kg</b> ｜ 素材排水{' '}
-            <b>{vol.displace.toFixed(0)} 件</b> ｜ 有效水量 <b>{vol.eff.toFixed(1)}L</b>
+            毛水量 <b>{vol.gross.toFixed(1)}L</b> ｜ 底砂体积 <b>{vol.subVol.toFixed(1)}L</b> ｜ 底砂重量{' '}
+            <b>{vol.subKg.toFixed(1)}kg</b> ｜ 素材排水 <b>{vol.displace.toFixed(1)}L</b> ｜ 有效水量{' '}
+            <b>{vol.eff.toFixed(1)}L</b>
           </div>
         </section>
 
