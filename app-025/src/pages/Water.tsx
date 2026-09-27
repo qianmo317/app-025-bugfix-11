@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { Plan } from '../core/types';
 import { updateWater } from '../state/plans';
 import { Link } from '../router';
-import { effectiveVolumeL } from '../core/volume';
+import { effectiveVolumeL, waterSurfaceAreaM2 } from '../core/volume';
 import {
   roMixForGh,
   saltForGh,
@@ -27,7 +27,7 @@ export default function Water({ plan }: { plan: Plan }) {
   const eff = effectiveVolumeL(plan.tank, plan.substrate, plan.items);
   const plantQty = plan.items.filter((i) => i.kind === 'plant').reduce((s, i) => s + (i.qty ?? 1), 0);
 
-  const [actualLumens, setActualLumens] = useState<number>(() => recommendLumens('mid', (plan.tank.l * plan.tank.w) / 10000));
+  const [actualLumens, setActualLumens] = useState<number>(() => recommendLumens('mid', waterSurfaceAreaM2(plan.tank)));
 
   const ghRo = useMemo(() => roMixForGh(w.tapGh, w.targetGh, eff), [w.tapGh, w.targetGh, eff]);
   const ghSalt = useMemo(() => saltForGh(w.tapGh, w.targetGh, eff), [w.tapGh, w.targetGh, eff]);
@@ -36,7 +36,7 @@ export default function Water({ plan }: { plan: Plan }) {
   const currentCo2AtTargetPh = targetPh ? co2FromPhKh(w.tapKh, targetPh) : 0;
   const bubbles = co2BubblesPerSec(w.targetCo2Ppm, eff);
 
-  const areaM2 = (plan.tank.l * plan.tank.w) / 1000;
+  const areaM2 = waterSurfaceAreaM2(plan.tank);
   const level = classifyLightByLumen(actualLumens, areaM2);
   const lightCheck = checkLight(level, plan.items);
   const flow = filterFlowLph(eff);
